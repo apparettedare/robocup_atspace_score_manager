@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import rospy
 import tf2_ros
@@ -9,7 +9,7 @@ class GoalDetectorTF:
         rospy.init_node('goal_detector_node')
 
         self.x_range = [10.0, 12.0]
-        self.y_range = [-10.0, -8.0] 
+        self.y_range = [-8.0, -10.0] 
         self.z_range = [4.0, 6.0]
 
         self.tf_buffer   = tf2_ros.Buffer()
@@ -32,17 +32,20 @@ class GoalDetectorTF:
             in_x = abs(self.x_range[0]) < abs(curr_x) < abs(self.x_range[1])
             in_y = abs(self.y_range[0]) < abs(curr_y) < abs(self.y_range[1])
             in_z = abs(self.z_range[0]) < abs(curr_z) < abs(self.z_range[1])
-            # rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
-            #               curr_x, curr_y, curr_z, in_x, in_y, in_z)
+
 
             if in_x and in_y and in_z:
                 if not self.is_inside:
                     self.score += 10
                     self.is_inside = True
-                    rospy.loginfo("目標位置に到達しました! Score: %d", self.score)
-            # else:
-            #     if self.is_inside:
-            #         rospy.loginfo("目標位置から離れました")
+                    rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
+                            curr_x, curr_y, curr_z, in_x, in_y, in_z)
+                    rospy.loginfo("Goal reached! Score: %d", self.score)
+            else:
+                rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
+                        curr_x, curr_y, curr_z, in_x, in_y, in_z)
+                if self.is_inside:
+                    rospy.loginfo("Goal position left")
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             pass
