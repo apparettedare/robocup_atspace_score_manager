@@ -5,27 +5,25 @@ import rospy
 import smach
 import smach_ros
 import tf2_ros
-from smach_files.goal_detector import GoalDetectorTF
+from smach_files.goal_checker import GoalChecker
 
 class InitialState(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['ready', 'error'])
+        smach.State.__init__(self, outcomes=['success', 'fail'])
     
     def execute(self, userdata):
-        rospy.loginfo('初期状態: システム起動中...')
+        rospy.loginfo('=== Initial State ===')
         try:
-            rospy.sleep(1.0)
-            rospy.loginfo('システムが準備完了しました')
-            return 'ready'
+            return 'success'
         except Exception as e:
-            rospy.logerr('システム初期化エラー: %s', str(e))
-            return 'error'
+            rospy.logerr('System initialization error: %s', str(e))
+            return 'fail'
 
 
-class MoveToGoalState(smach.State):
-    def __init__(self, goal_detector):
-        smach.State.__init__(self, outcomes=['goal_reached', 'timeout', 'error'])
-        self.goal_detector = goal_detector
+class CheckGoalState(smach.State):
+    def __init__(self, goal_checker):
+        smach.State.__init__(self, outcomes=['success', 'timeout', 'fail'])
+        self.goal_checker = goal_checker
         self.start_time = None
         self.timeout_duration = 600.0
     
@@ -35,9 +33,9 @@ class MoveToGoalState(smach.State):
         try:
             while not rospy.is_shutdown():
                 # 目標位置に到達したか確認
-                if self.goal_detector.is_inside:
+                if self.goal_checker.is_inside:
                     rospy.loginfo('目標位置に到達しました!')
-                    return 'goal_reached'
+                    return 'success'
                 
                 # タイムアウト確認
                 elapsed = (rospy.Time.now() - self.start_time).to_sec()
@@ -49,16 +47,16 @@ class MoveToGoalState(smach.State):
         
         except Exception as e:
             rospy.logerr('移動状態エラー: %s', str(e))
-            return 'error'
+            return 'fail'
 
 
-class CheckPositionState(smach.State):
+class CheckObjectDetectState(smach.State):
     """
     目標位置確認状態: 目標位置内にいることを確認
     """
-    def __init__(self, goal_detector):
-        smach.State.__init__(self, outcomes=['confirmed', 'left_area', 'error'])
-        self.goal_detector = goal_detector
+    def __init__(self, goal_checker):
+        smach.State.__init__(self, outcomes=['confirmed', 'left_area', 'fail'])
+        self.goal_checker = goal_checker
         self.check_duration = 5.0  # 5秒間確認
     
     def execute(self, userdata):
@@ -67,7 +65,7 @@ class CheckPositionState(smach.State):
         
         try:
             while not rospy.is_shutdown():
-                if not self.goal_detector.is_inside:
+                if not self.goal_checker.is_inside:
                     rospy.logwarn('目標位置から離れました')
                     return 'left_area'
                 
@@ -80,34 +78,31 @@ class CheckPositionState(smach.State):
         
         except Exception as e:
             rospy.logerr('確認状態エラー: %s', str(e))
-            return 'error'
+            return 'fail'
 
 
 class ScoringState(smach.State):
     """
     スコアリング状態: 目標到達時のスコアを獲得
     """
-    def __init__(self, goal_detector):
-        smach.State.__init__(self, outcomes=['success', 'error'])
-        self.goal_detector = goal_detector
+    def __init__(self, goal_checker):
+        smach.State.__init__(self, outcomes=['success', 'fail'])
+        self.goal_checker = goal_checker
     
     def execute(self, userdata):
         rospy.loginfo('スコアリング状態: スコアを計算中...')
         
         try:
-            final_score = self.goal_detector.score
+            final_score = self.goal_checker.score
             rospy.loginfo('最終スコア: %d', final_score)
             return 'success'
         
         except Exception as e:
             rospy.logerr('スコアリングエラー: %s', str(e))
-            return 'error'
+            return 'fail'
 
 
-class ErrorState(smach.State):
-    """
-    エラー状態: エラー処理
-    """
+class failState(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['reset', 'shutdown'])
     
@@ -118,47 +113,39 @@ class ErrorState(smach.State):
 
 
 def main():
-    """
-    メイン関数: SMACH状態機械の初期化と実行
-    """
     rospy.init_node('robocup_atspace_score_manager_node')
     
-    goal_detector = GoalDetectorTF()
+    goal_checker = GoalChecker()
+    object_detect_checker = ObjectDetectChecker()
     
-    sm = smach.StateMachine(outcomes=['success'])
+    sm = smach.StateMachine(outcomes=['success', 'fail'])
     
     with sm:
         smach.StateMachine.add('INITIAL', InitialState(),
-                               transitions={'ready': 'MOVE_TO_GOAL',
-                                           'error': 'ERROR'})
+                               transitions={'success': 'CHECK_GOAL',
+                                           'fail': 'FAIL'})
         
-        smach.StateMachine.add('MOVE_TO_GOAL', MoveToGoalState(goal_detector),
-                               transitions={'goal_reached': 'CHECK_POSITION',
-                                           'timeout': 'ERROR',
-                                           'error': 'ERROR'})
+        smach.StateMachine.add('CHECK_GOAL', CheckGoalState(goal_checker),
+                               transitions={'success': 'CHECK_OBJECT_DETECT',
+                                           'timeout': 'SCOREING',
+                                           'fail': 'FAIL'})
         
-        smach.StateMachine.add('CHECK_POSITION', CheckPositionState(goal_detector),
-                               transitions={'confirmed': 'SCORING',
-                                           'left_area': 'MOVE_TO_GOAL',
-                                           'error': 'ERROR'})
+        smach.StateMachine.add('CHECK_OBJECT_DETECT', CheckObjectDetectState(object_detect_checker),
+                               transitions={'success': 'CHECK_GOAL',
+                                           'timeout': 'SCOREING',
+                                           'fail': 'FAIL'})
         
-        smach.StateMachine.add('SCORING', ScoringState(goal_detector),
+        smach.StateMachine.add('SCORING', ScoringState(),
                                transitions={'success': 'success',
-                                           'error': 'ERROR'})
-        
-        smach.StateMachine.add('ERROR', ErrorState(),
-                               transitions={'reset': 'INITIAL',
-                                           'shutdown': 'failure'})
+                                           'fail': 'FAIL'})
     
-    # ビジュアライゼーション用に状態機械を設定
     sis = smach_ros.IntrospectionServer('robocup_atspace_score_manager_smach', sm, '/robocup_atspace_score_manager')
     sis.start()
     
-    # ステートマシンの実行
-    rospy.loginfo('ATSPACE スコアマネジャーを開始します')
+    rospy.loginfo('RoboCup@Space Score Manager is running...')
     outcome = sm.execute()
     
-    rospy.loginfo('スコアマネジャー終了: %s', outcome)
+    rospy.loginfo('Score Manager finished: %s', outcome)
     sis.stop()
     
     return outcome
@@ -167,8 +154,8 @@ def main():
 if __name__ == '__main__':
     try:
         outcome = main()
-        rospy.loginfo('プログラム終了: %s', outcome)
+        rospy.loginfo('Program finished: %s', outcome)
     except rospy.ROSInterruptException:
-        rospy.loginfo('ROSが中断されました')
+        rospy.loginfo('Program interrupted by user')
     except Exception as e:
-        rospy.logerr('予期しないエラー: %s', str(e))
+        rospy.logerr('Unexpected error: %s', str(e))

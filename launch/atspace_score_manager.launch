@@ -1,0 +1,5 @@
+<launch>
+    <node name="goal_detector_node" pkg="robocup_atspace_score_manager" type="atspace_score_manager.py" output="screen">
+        <rosparam command="load" file="$(find robocup_atspace_score_manager)/config/competition.yaml" />
+    </node>
+</launch>

@@ -4,18 +4,19 @@ import rospy
 import tf2_ros
 import geometry_msgs.msg
 
-class GoalDetectorTF:
+class GoalChecker:
     def __init__(self):
         rospy.init_node('goal_detector_node')
 
-        self.x_range = [10.0, 12.0]
-        self.y_range = [-8.0, -10.0] 
-        self.z_range = [4.0, 6.0]
+        self.x_range = rospy.get_param('~first_goal_area/x_range', [10.0, 12.0])
+        self.y_range = rospy.get_param('~first_goal_area/y_range', [-10.0, -8.0])
+        self.z_range = rospy.get_param('~first_goal_area/z_range', [4.0, 6.0])
+        rospy.loginfo("Goal Area: X:%s Y:%s Z:%s", self.x_range, self.y_range, self.z_range)
 
         self.tf_buffer   = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
-        self.score     = 0
+        self.score     = rospy.get_param('~initial_score', 0)
         self.is_inside = False
 
         self.timer = rospy.Timer(rospy.Duration(1.0), self.check_position)
@@ -29,18 +30,18 @@ class GoalDetectorTF:
             curr_z = trans.transform.translation.z
             
 
-            in_x = abs(self.x_range[0]) < abs(curr_x) < abs(self.x_range[1])
-            in_y = abs(self.y_range[0]) < abs(curr_y) < abs(self.y_range[1])
-            in_z = abs(self.z_range[0]) < abs(curr_z) < abs(self.z_range[1])
+            in_x = self.x_range[0] < curr_x < self.x_range[1]
+            in_y = self.y_range[0] < curr_y < self.y_range[1]
+            in_z = self.z_range[0] < curr_z < self.z_range[1]
 
 
             if in_x and in_y and in_z:
                 if not self.is_inside:
                     self.score += 10
                     self.is_inside = True
-                    rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
-                            curr_x, curr_y, curr_z, in_x, in_y, in_z)
-                    rospy.loginfo("Goal reached! Score: %d", self.score)
+                    # rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
+                    #         curr_x, curr_y, curr_z, in_x, in_y, in_z)
+                    rospy.loginfo("First Goal reached! Score: %d", self.score)
             else:
                 rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
                         curr_x, curr_y, curr_z, in_x, in_y, in_z)
@@ -51,5 +52,11 @@ class GoalDetectorTF:
             pass
 
 if __name__ == '__main__':
-    detector = GoalDetectorTF()
-    rospy.spin()
+    try:
+        detector = GoalChecker
+        
+        
+        ()
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        pass
