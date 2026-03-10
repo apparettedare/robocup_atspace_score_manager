@@ -112,9 +112,7 @@ class failState(smach.State):
         return 'reset'
 
 
-def main():
-    rospy.init_node('robocup_atspace_score_manager_node')
-    
+def main():    
     goal_checker = GoalChecker()
     object_detect_checker = ObjectDetectChecker()
     
@@ -149,13 +147,12 @@ def main():
     rospy.loginfo('Score Manager finished: %s', outcome)
     sis.stop()
     
-    return outcome
 
 
 if __name__ == '__main__':
     try:
-        outcome = main()
-        rospy.loginfo('Program finished: %s', outcome)
+        rospy.init_node('robocup_atspace_score_manager_node')
+        main()
     except rospy.ROSInterruptException:
         rospy.loginfo('Program interrupted by user')
     except Exception as e:
