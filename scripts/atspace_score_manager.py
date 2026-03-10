@@ -81,7 +81,7 @@ class CheckObjectDetectState(smach.State):
             return 'fail'
 
 
-class ScoringState(smach.State):
+class FinishState(smach.State):
     """
     スコアリング状態: 目標到達時のスコアを獲得
     """
@@ -126,16 +126,17 @@ def main():
                                            'fail': 'FAIL'})
         
         smach.StateMachine.add('CHECK_GOAL', CheckGoalState(goal_checker),
-                               transitions={'success': 'CHECK_OBJECT_DETECT',
-                                           'timeout': 'SCOREING',
+                               transitions={'check_object_detect': 'CHECK_OBJECT_DETECT',
+                                            'finish': 'FINISH',
+                                           'timeout': 'FINISH',
                                            'fail': 'FAIL'})
         
         smach.StateMachine.add('CHECK_OBJECT_DETECT', CheckObjectDetectState(object_detect_checker),
                                transitions={'success': 'CHECK_GOAL',
-                                           'timeout': 'SCOREING',
+                                           'timeout': 'FINISH',
                                            'fail': 'FAIL'})
         
-        smach.StateMachine.add('SCORING', ScoringState(),
+        smach.StateMachine.add('FINISH', FinishState(),
                                transitions={'success': 'success',
                                            'fail': 'FAIL'})
     
