@@ -34,18 +34,14 @@ class GoalChecker:
             in_z = self.z_range[0] < curr_z < self.z_range[1]
 
 
+            # rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
+            #         curr_x, curr_y, curr_z, in_x, in_y, in_z)
+
             if in_x and in_y and in_z:
                 if not self.is_inside:
                     self.score += 10
                     self.is_inside = True
-                    # rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
-                    #         curr_x, curr_y, curr_z, in_x, in_y, in_z)
                     rospy.loginfo("First Goal reached! Score: %d", self.score)
-            else:
-                rospy.loginfo("Current Position: (%.2f, %.2f, %.2f) | In Box: X:%s Y:%s Z:%s", 
-                        curr_x, curr_y, curr_z, in_x, in_y, in_z)
-                if self.is_inside:
-                    rospy.loginfo("Goal position left")
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             pass
