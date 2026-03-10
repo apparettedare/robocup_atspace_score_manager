@@ -5,13 +5,12 @@ import tf2_ros
 import geometry_msgs.msg
 
 class GoalChecker:
-    def __init__(self):
+    def __init__(self, x_range, y_range, z_range):
         rospy.init_node('goal_detector_node')
 
-        self.x_range = rospy.get_param('~first_goal_area/x_range', [10.0, 12.0])
-        self.y_range = rospy.get_param('~first_goal_area/y_range', [-10.0, -8.0])
-        self.z_range = rospy.get_param('~first_goal_area/z_range', [4.0, 6.0])
-        rospy.loginfo("Goal Area: X:%s Y:%s Z:%s", self.x_range, self.y_range, self.z_range)
+        self.x_range = x_range
+        self.y_range = y_range
+        self.z_range = z_range
 
         self.tf_buffer   = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
@@ -53,10 +52,7 @@ class GoalChecker:
 
 if __name__ == '__main__':
     try:
-        detector = GoalChecker
-        
-        
-        ()
+        checker = GoalChecker([10.0, 12.0], [-10.0, -8.0], [4.0, 6.0])
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
