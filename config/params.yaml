@@ -16,14 +16,10 @@ search_area:
 fixed_objects:
   name:
   - "airlock"
-  position:
-    airlock: [15.0, -5.0, 5.0]
 
 portable_objects:
   name:
   - "laptop"
-  position:
-    laptop: [20.0, -3.0, 5.0]
 
 safety_distance: 0.3
 
