@@ -51,9 +51,6 @@ class CheckGoalState(smach.State):
 
 
 class CheckObjectDetectState(smach.State):
-    """
-    目標位置確認状態: 目標位置内にいることを確認
-    """
     def __init__(self, goal_checker):
         smach.State.__init__(self, outcomes=['confirmed', 'left_area', 'fail'])
         self.goal_checker = goal_checker
@@ -82,9 +79,6 @@ class CheckObjectDetectState(smach.State):
 
 
 class FinishState(smach.State):
-    """
-    スコアリング状態: 目標到達時のスコアを獲得
-    """
     def __init__(self, goal_checker):
         smach.State.__init__(self, outcomes=['success', 'fail'])
         self.goal_checker = goal_checker
@@ -100,16 +94,6 @@ class FinishState(smach.State):
         except Exception as e:
             rospy.logerr('スコアリングエラー: %s', str(e))
             return 'fail'
-
-
-class failState(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['reset', 'shutdown'])
-    
-    def execute(self, userdata):
-        rospy.logerr('エラーが発生しました。システムをリセットします')
-        rospy.sleep(2.0)
-        return 'reset'
 
 
 def main():    
