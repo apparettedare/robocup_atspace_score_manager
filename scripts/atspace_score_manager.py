@@ -5,7 +5,7 @@ import rospy
 import smach
 import smach_ros
 import tf2_ros
-from smach_files.goal_checker import GoalChecker
+# from smach_files.goal_checker import GoalChecker
 
 class InitialState(smach.State):
     def __init__(self):
@@ -20,7 +20,7 @@ class InitialState(smach.State):
             return 'fail'
 
 
-class STARTTASKState(smach.State):
+class StartTaskState(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['success', 'timeout', 'fail'])
     
@@ -89,15 +89,14 @@ class FinishState(smach.State):
             return 'fail'
 
 def main():    
-    goal_checker = GoalChecker()
-    object_detect_checker = ObjectDetectChecker()
+    # goal_checker = GoalChecker()
+    # object_detect_checker = ObjectDetectChecker()
     
     sm = smach.StateMachine(outcomes=['SUCCESS', 'FAIL'])
     
     with sm:
         smach.StateMachine.add('INITIAL', InitialState(),
                                transitions={'success': 'STARTTASK',
-                                            'timeout': 'FINISH',
                                            'fail': 'FAIL'})
         
         smach.StateMachine.add('STARTTASK', StartTaskState(),
