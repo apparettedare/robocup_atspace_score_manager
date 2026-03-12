@@ -3,36 +3,16 @@ trial_number: 1
 initial_score: 0
 competition_time_limit: 300
 
-docking_area:
-  x_range: [10.0, 12.0]
-  y_range: [-10.0, -8.0]
-  z_range: [4.0, 6.0]
-
-navigation_area:
-  x_range: [10.0, 12.0]
-  y_range: [-10.0, -8.0]
-  z_range: [4.0, 6.0]
-
-search_area:
-  x_range: [10.0, 12.0]
-  y_range: [-10.0, -8.0]
-  z_range: [4.0, 6.0]
-
-fixed_objects:
-  name:
-  - "cup_noodle"
-  position:
-    cup_noodle: [15.0, -5.0, 5.0]
-
-portable_objects:
-  name:
-  - "laptop"
-  position:
-    laptop: [20.0, -3.0, 5.0]
-
-safety_distance: 0.3
-
-capture_conditions:
-  distance_threshold: 1.0
-  dot_product_threshold: 0.5
-  
+scoring:
+  start_task:
+    departure: 10
+  navigation_task:
+    reach_goal: 20
+    avoid_obstacle: 10
+    safety_bonus: 20
+  search_task:
+    fixed_object_capture: 20
+    portable_object_capture: 20
+  docking_task:
+    arrival: 20
+    docking: 20
