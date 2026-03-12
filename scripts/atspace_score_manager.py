@@ -26,10 +26,10 @@ class STARTTASKState(smach.State):
     
     def execute(self, userdata):
         rospy.loginfo('=== Start Task State ===')
-            try:
-                if rospy.get_time() > 300:
-                    return 'timeout'
-                return 'success'
+        try:
+            if rospy.get_time() > 300:
+                return 'timeout'
+            return 'success'
         except Exception as e:
             rospy.logerr('Start task error: %s', str(e))
             return 'fail'
