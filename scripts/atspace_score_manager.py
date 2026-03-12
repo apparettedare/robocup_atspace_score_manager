@@ -40,7 +40,7 @@ class InitialState(smach.State):
 
 class StartTaskState(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['success', 'timeout', 'fail'], input_keys=['start_task_score'], output_keys=['start_task_score'])
+        smach.State.__init__(self, outcomes=['success', 'fail'], input_keys=['start_task_score'], output_keys=['start_task_score'])
     
     def execute(self, userdata):
         rospy.loginfo('=== Start Task State ===')
@@ -53,7 +53,7 @@ class StartTaskState(smach.State):
 
 class NavigationTaskState(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['success', 'timeout', 'fail'], input_keys=['navigation_task_score'], output_keys=['navigation_task_score'])
+        smach.State.__init__(self, outcomes=['success', 'fail'], input_keys=['navigation_task_score'], output_keys=['navigation_task_score'])
     
     def execute(self, userdata):
         rospy.loginfo('=== Navigation Task State ===')
@@ -65,7 +65,7 @@ class NavigationTaskState(smach.State):
 
 class SearchTaskState(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['success', 'timeout', 'fail'], input_keys=['search_task_score'], output_keys=['search_task_score'])
+        smach.State.__init__(self, outcomes=['success', 'fail'], input_keys=['search_task_score'], output_keys=['search_task_score'])
 
     def execute(self, userdata):
         rospy.loginfo('=== Search Task State ===')
@@ -77,7 +77,7 @@ class SearchTaskState(smach.State):
 
 class DockingTaskState(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['success', 'timeout', 'fail'], input_keys=['docking_task_score'], output_keys=['docking_task_score'])
+        smach.State.__init__(self, outcomes=['success', 'fail'], input_keys=['docking_task_score'], output_keys=['docking_task_score'])
 
     def execute(self, userdata):
         rospy.loginfo('=== Docking Task State ===')
@@ -106,25 +106,21 @@ def main():
         
         smach.StateMachine.add('STARTTASK', StartTaskState(),
                                transitions={'success': 'NAVIGATIONTASK',
-                                            'timeout': 'task_all_finished',
-                                           'fail': 'task_failed'},
+                                            'fail': 'task_failed'},
                                remapping={'start_task_score': 'score'})
 
         smach.StateMachine.add('NAVIGATIONTASK', NavigationTaskState(),
                                transitions={'success': 'SEARCHTASK',
-                                            'timeout': 'task_all_finished',
-                                           'fail': 'task_failed'},
+                                            'fail': 'task_failed'},
                                remapping={'navigation_task_score': 'score'})
 
         smach.StateMachine.add('SEARCHTASK', SearchTaskState(),
                                transitions={'success': 'DOCKINGTASK',
-                                            'timeout': 'task_all_finished',
-                                           'fail': 'task_failed'},
+                                            'fail': 'task_failed'},
                                remapping={'search_task_score': 'score'})
 
         smach.StateMachine.add('DOCKINGTASK', DockingTaskState(),
                                transitions={'success': 'task_all_finished',
-                                            'timeout': 'task_all_finished',
                                            'fail': 'task_failed'},
                                remapping={'docking_task_score': 'score'})
         
