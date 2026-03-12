@@ -27,8 +27,8 @@ class StartTaskState(smach.State):
     def execute(self, userdata):
         rospy.loginfo('=== Start Task State ===')
         try:
-            if rospy.get_time() > 300:
-                return 'timeout'
+            # if rospy.get_time() > 300:
+            #     return 'timeout'
             return 'success'
         except Exception as e:
             rospy.logerr('Start task error: %s', str(e))
@@ -41,8 +41,8 @@ class NavigationTaskState(smach.State):
     def execute(self, userdata):
         rospy.loginfo('=== Navigation Task State ===')
         try:
-            if rospy.get_time() > 300:
-                return 'timeout'
+            # if rospy.get_time() > 300:
+            #     return 'timeout'
             return 'success'
         except Exception as e:
             rospy.logerr('Navigation task error: %s', str(e))
@@ -55,8 +55,8 @@ class SearchTaskState(smach.State):
     def execute(self, userdata):
         rospy.loginfo('=== Search Task State ===')
         try:
-            if rospy.get_time() > 300:
-                return 'timeout'
+            # if rospy.get_time() > 300:
+            #     return 'timeout'
             return 'success'
         except Exception as e:
             rospy.logerr('Search task error: %s', str(e))
@@ -69,8 +69,8 @@ class DockingTaskState(smach.State):
     def execute(self, userdata):
         rospy.loginfo('=== Docking Task State ===')
         try:
-            if rospy.get_time() > 300:
-                return 'timeout'
+            # if rospy.get_time() > 300:
+            #     return 'timeout'
             return 'success'
         except Exception as e:
             rospy.logerr('Docking task error: %s', str(e))
