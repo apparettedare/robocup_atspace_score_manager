@@ -2,7 +2,7 @@ competition:
   team_name: "teamA"
   trial_number: 1
   initial_score: 0
-  time_limit: 30
+  time_limit: 300
 
   scoring:
     start_task:
