@@ -15,9 +15,9 @@ search_area:
 
 fixed_objects:
   name:
-  - "cup_noodle"
+  - "airlock"
   position:
-    cup_noodle: [15.0, -5.0, 5.0]
+    airlock: [15.0, -5.0, 5.0]
 
 portable_objects:
   name:
